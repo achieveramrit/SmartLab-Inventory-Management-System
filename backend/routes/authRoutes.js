@@ -3,7 +3,9 @@ const express = require("express");
 const {
     registerStudent,
     login,
-    getMe
+    getMe,
+    updateProfile,
+    resetPassword
 } = require("../controllers/authController");
 
 const {
@@ -30,6 +32,18 @@ router.get(
     "/me",
     protect,
     getMe
+);
+
+router.put(
+    "/profile",
+    protect,
+    updateProfile
+);
+
+router.put(
+    "/reset-password",
+    protect,
+    resetPassword
 );
 
 

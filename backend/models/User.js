@@ -32,6 +32,12 @@ const userSchema = new mongoose.Schema(
             default: null
         },
 
+        phone: {
+            type: String,
+            default: "",
+            trim: true
+        },
+
         department: {
             type: String,
             default: "Computer Engineering"

@@ -38,9 +38,28 @@ const requestSchema = new mongoose.Schema(
                 "rejected",
                 "issued",
                 "returned",
-                "overdue"
+                "overdue",
+                "broken",
+                "lost"
             ],
             default: "pending"
+        },
+
+        returnCondition: {
+            type: String,
+            enum: ["good", "broken", "lost"],
+            default: "good"
+        },
+
+        extensionStatus: {
+            type: String,
+            enum: ["none", "requested", "extended"],
+            default: "none"
+        },
+
+        extensionReason: {
+            type: String,
+            default: ""
         },
 
         approvedDate: {

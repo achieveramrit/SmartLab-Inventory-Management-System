@@ -28,7 +28,8 @@ const registerStudent = async (req, res) => {
             email,
             password,
             studentId,
-            department
+            department,
+            phone
         } = req.body;
 
 
@@ -68,7 +69,8 @@ const registerStudent = async (req, res) => {
             password: hashedPassword,
             role: "student",
             studentId,
-            department
+            department,
+            phone: phone || ""
 
         });
 
@@ -84,7 +86,9 @@ const registerStudent = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                studentId: user.studentId
+                studentId: user.studentId,
+                department: user.department,
+                phone: user.phone || ""
             }
 
         });
@@ -162,7 +166,9 @@ const login = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                studentId: user.studentId
+                studentId: user.studentId,
+                department: user.department,
+                phone: user.phone || ""
             }
 
         });
@@ -190,8 +196,90 @@ const getMe = async (req, res) => {
 };
 
 
+// ========================
+// UPDATE PROFILE
+// ========================
+const updateProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const { name, department, studentId, phone } = req.body;
+        if (name && name.trim()) user.name = name.trim();
+        if (department && department.trim()) user.department = department.trim();
+        if (studentId !== undefined && user.role === "student") user.studentId = studentId ? studentId.trim() : null;
+        if (phone !== undefined) user.phone = phone ? phone.trim() : "";
+
+        await user.save();
+
+        res.status(200).json({
+            message: "Profile updated successfully.",
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                studentId: user.studentId,
+                department: user.department,
+                phone: user.phone || ""
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+// ========================
+// RESET / CHANGE PASSWORD
+// ========================
+const resetPassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                message: "Current password and new password are required."
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                message: "New password must be at least 6 characters long."
+            });
+        }
+
+        // Fetch user with password field
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({
+                message: "Current password does not match."
+            });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        res.status(200).json({
+            message: "Password updated successfully."
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
 module.exports = {
     registerStudent,
     login,
-    getMe
+    getMe,
+    updateProfile,
+    resetPassword
 };

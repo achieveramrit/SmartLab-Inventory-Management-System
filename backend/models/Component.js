@@ -26,6 +26,12 @@ const componentSchema = new mongoose.Schema(
             default: ""
         },
 
+        imageUrl: {
+            type: String,
+            default: "",
+            trim: true
+        },
+
         totalQuantity: {
             type: Number,
             required: true,
@@ -46,12 +52,41 @@ const componentSchema = new mongoose.Schema(
         lowStockLimit: {
             type: Number,
             default: 2
-        }
+        },
+
+        // Admin-appended manual history notes (procurement, repair, decommission, etc.)
+        manualHistory: [
+            {
+                title: { type: String, required: true, trim: true },
+                description: { type: String, default: "", trim: true },
+                eventDate: { type: Date, default: Date.now },
+                type: {
+                    type: String,
+                    enum: ["procurement", "repair", "maintenance", "decommission", "note", "upgrade", "other"],
+                    default: "note"
+                },
+                createdAt: { type: Date, default: Date.now }
+            }
+        ]
     },
     {
         timestamps: true
     }
 );
+
+// ── Indexes for high-performance search and filtering ──────────
+// Compound text index for full-text search
+componentSchema.index({
+    name: "text",
+    description: "text",
+    category: "text",
+    componentId: "text"
+});
+
+// Single & compound field indexes for exact/prefix/range queries
+componentSchema.index({ category: 1, name: 1 });
+componentSchema.index({ availableQuantity: 1 });
+componentSchema.index({ createdAt: -1 });
 
 module.exports =
     mongoose.models.Component ||
