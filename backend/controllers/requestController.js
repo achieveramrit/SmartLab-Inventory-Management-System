@@ -1,4 +1,4 @@
-const Request = require("../models/Request");
+﻿const Request = require("../models/Request");
 const Component = require("../models/Component");
 const LabSettings = require("../models/LabSettings");
 const { sendOverdueEmail } = require("../services/emailService");
@@ -77,7 +77,7 @@ const createBatchRequest = async (req, res) => {
         for (const item of items) {
             const { componentId, quantity } = item;
             if (!componentId || !quantity || quantity < 1) {
-                errors.push({ componentId, reason: "Invalid item — missing componentId or quantity." });
+                errors.push({ componentId, reason: "Invalid item â€” missing componentId or quantity." });
                 continue;
             }
 
@@ -715,6 +715,87 @@ const batchIssue = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
+
+// ====================================
+// ADMIN: CREATE MANUAL HISTORY ENTRY
+// Allows admin to backfill written/physical lab records as Request documents.
+// ====================================
+const createManualHistoryEntry = async (req, res) => {
+    try {
+        const { componentId } = req.params;
+        const {
+            studentId,
+            studentName,
+            studentRollId,
+            studentEmail,
+            studentPhone,
+            studentDepartment,
+            quantity          = 1,
+            purpose           = "Manual entry (backfilled)",
+            status            = "returned",
+            issueDate,
+            expectedReturnDate,
+            actualReturnDate,
+            returnCondition   = "good",
+            adminComment      = "",
+        } = req.body;
+
+        if (!componentId) return res.status(400).json({ message: "Component ID is required." });
+        if (!issueDate)   return res.status(400).json({ message: "Issue date is required." });
+
+        const component = await Component.findById(componentId);
+        if (!component) return res.status(404).json({ message: "Component not found." });
+
+        const entryData = {
+            component:          componentId,
+            quantity:           Number(quantity) || 1,
+            purpose,
+            status,
+            isManualEntry:      true,
+            issueDate:          new Date(issueDate),
+            expectedReturnDate: expectedReturnDate ? new Date(expectedReturnDate) : null,
+            actualReturnDate:   actualReturnDate   ? new Date(actualReturnDate)   : null,
+            returnCondition,
+            adminComment,
+            requestDate:        new Date(issueDate),
+            manualStudentInfo: {
+                name:       studentName       || "",
+                studentId:  studentRollId     || "",
+                email:      studentEmail      || "",
+                phone:      studentPhone      || "",
+                department: studentDepartment || "",
+            },
+            student: studentId || req.user._id,
+        };
+
+        const entry = await Request.create(entryData);
+        const populated = await Request.findById(entry._id)
+            .populate("student", "name email studentId department phone")
+            .populate("component", "name componentId")
+            .lean();
+
+        res.status(201).json({ message: "Manual history entry created successfully.", data: populated });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// ====================================
+// ADMIN: DELETE A MANUAL HISTORY ENTRY
+// ====================================
+const deleteManualHistoryEntry = async (req, res) => {
+    try {
+        const { entryId } = req.params;
+        const entry = await Request.findById(entryId);
+        if (!entry) return res.status(404).json({ message: "Entry not found." });
+        if (!entry.isManualEntry) return res.status(403).json({ message: "Only manually added entries can be deleted." });
+        await entry.deleteOne();
+        res.status(200).json({ message: "Manual entry deleted." });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     createRequest,
     createBatchRequest,
@@ -731,5 +812,7 @@ module.exports = {
     getComponentHistory,
     batchApprove,
     batchReject,
-    batchIssue
+    batchIssue,
+    createManualHistoryEntry,
+    deleteManualHistoryEntry
 };

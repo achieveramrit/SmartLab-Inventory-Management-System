@@ -166,7 +166,7 @@ function InventoryModule({ token, user, onNavigate, refreshRef, pageNavRef }) {
   );
 
   return (
-    <section className="inventory-section">
+    <section className="inventory-section" style={{ paddingBottom: "1rem" }}>
       {/* Stats row — ONLY shown for Admin as requested */}
       {isAdmin && (
         <div className="stats">

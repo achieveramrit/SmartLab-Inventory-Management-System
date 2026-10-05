@@ -90,6 +90,21 @@ const requestSchema = new mongoose.Schema(
         adminComment: {
             type: String,
             default: ""
+        },
+
+        // Marks records added manually by admin for backfilling physical lab records
+        isManualEntry: {
+            type: Boolean,
+            default: false
+        },
+
+        // Stores student details for manual entries that don't have a User document
+        manualStudentInfo: {
+            name:       { type: String, default: "" },
+            studentId:  { type: String, default: "" },
+            email:      { type: String, default: "" },
+            phone:      { type: String, default: "" },
+            department: { type: String, default: "" }
         }
     },
     {

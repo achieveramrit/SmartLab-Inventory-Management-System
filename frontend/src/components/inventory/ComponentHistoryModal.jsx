@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import Pagination from "../ui/Pagination";
 import AddManualHistoryModal from "./AddManualHistoryModal";
+import AddRequestHistoryModal from "./AddRequestHistoryModal";
 import { CloseIcon, HistoryIcon, FileTextIcon, PrinterIcon, PhoneIcon, PlusIcon, TrashIcon } from "../ui/Icons";
 
 /**
@@ -24,7 +25,8 @@ function ComponentHistoryModal({ component: initialComponent, token, onClose, is
 
   // Tab: "requests" | "lifecycle"
   const [activeTab, setActiveTab] = useState("requests");
-  const [showAddEntry, setShowAddEntry] = useState(false);
+  const [showAddEntry, setShowAddEntry] = useState(false);           // lifecycle modal
+  const [showAddRequestEntry, setShowAddRequestEntry] = useState(false); // request history modal
   const [deleteLoadingId, setDeleteLoadingId] = useState(null);
 
   const loadHistory = async (page = 1) => {
@@ -284,43 +286,50 @@ function ComponentHistoryModal({ component: initialComponent, token, onClose, is
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="smartlab-modal-header">
-          <div>
+        <div className="smartlab-modal-header flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1">
             <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-[#fca311]">
               <HistoryIcon size={12} /> Audit Trail &amp; History
             </span>
-            <h3 className="text-base md:text-lg font-extrabold text-inherit flex items-center gap-2 mt-0.5 m-0">
-              <span>{component.name}</span>
-              <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-[#fca311] border border-amber-500/20 font-mono text-xs font-bold">
+            <h3 className="text-base font-extrabold text-inherit flex items-center gap-2 mt-0.5 m-0 flex-wrap">
+              <span className="truncate max-w-[180px] sm:max-w-none">{component.name}</span>
+              <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-[#fca311] border border-amber-500/20 font-mono text-xs font-bold shrink-0">
                 {component.componentId}
               </span>
             </h3>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Export Buttons — only on requests tab */}
+          {/* Action buttons row — wraps cleanly, never squashes */}
+          <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+            {/* Export Buttons + Add Record — only on requests tab */}
             {activeTab === "requests" && (
               <>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                    onClick={() => setShowAddRequestEntry(true)}
+                    title="Manually add a backfilled issue/return record from physical lab registers"
+                  >
+                    <PlusIcon size={13} /> Add Record
+                  </button>
+                )}
                 <button
                   type="button"
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-[#fca311] hover:bg-amber-500/25 border border-amber-500/30 transition-colors flex items-center gap-1.5"
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-[#fca311] hover:bg-amber-500/25 border border-amber-500/30 transition-colors flex items-center gap-1.5 whitespace-nowrap"
                   onClick={handleExportDOCX}
                   title="Export complete history as Word DOCX"
                 >
-                  <FileTextIcon size={13} /> Export DOCX
+                  <FileTextIcon size={13} /> DOCX
                 </button>
                 <button
                   type="button"
-                  style={{
-                    backgroundColor: "var(--surface-3)",
-                    color: "var(--text)",
-                    borderColor: "var(--border)",
-                  }}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold hover:opacity-85 border transition-colors flex items-center gap-1.5"
+                  style={{ backgroundColor: "var(--surface-3)", color: "var(--text)", borderColor: "var(--border)" }}
+                  className="px-2.5 py-1.5 rounded-lg text-xs font-bold hover:opacity-85 border transition-colors flex items-center gap-1.5 whitespace-nowrap"
                   onClick={handleExportPDF}
                   title="Export complete history as printable PDF"
                 >
-                  <PrinterIcon size={13} /> Export PDF
+                  <PrinterIcon size={13} /> PDF
                 </button>
               </>
             )}
@@ -328,7 +337,7 @@ function ComponentHistoryModal({ component: initialComponent, token, onClose, is
             {activeTab === "lifecycle" && isAdmin && (
               <button
                 type="button"
-                className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-[#fca311] hover:bg-amber-500/25 border border-amber-500/30 transition-colors flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-amber-500/15 text-amber-700 dark:text-[#fca311] hover:bg-amber-500/25 border border-amber-500/30 transition-colors flex items-center gap-1.5 whitespace-nowrap"
                 onClick={() => setShowAddEntry(true)}
               >
                 <PlusIcon size={13} /> Add Entry
@@ -336,7 +345,7 @@ function ComponentHistoryModal({ component: initialComponent, token, onClose, is
             )}
             <button
               type="button"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-inherit hover:bg-black/10 dark:hover:bg-white/10 transition-colors ml-1"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-inherit hover:bg-black/10 dark:hover:bg-white/10 transition-colors ml-1 shrink-0"
               onClick={onClose}
               aria-label="Close"
             >
@@ -435,23 +444,55 @@ function ComponentHistoryModal({ component: initialComponent, token, onClose, is
                         <th className="py-3 px-3">Issue Date</th>
                         <th className="py-3 px-3">Due Date</th>
                         <th className="py-3 px-3">Return Date</th>
+                        {isAdmin && <th className="py-3 px-3 text-right">Actions</th>}
                       </tr>
                     </thead>
                     <tbody className="divide-y" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
                       {history.map((record) => {
-                        const student = record.student || {};
+                        // For manual entries, use manualStudentInfo; otherwise use linked student
+                        const student = record.isManualEntry && record.manualStudentInfo?.name
+                          ? {
+                              name:       record.manualStudentInfo.name,
+                              studentId:  record.manualStudentInfo.studentId,
+                              email:      record.manualStudentInfo.email,
+                              phone:      record.manualStudentInfo.phone,
+                              department: record.manualStudentInfo.department,
+                            }
+                          : (record.student || {});
+
                         return (
-                          <tr key={record._id} className="transition-colors hover:opacity-90" style={{ borderColor: "var(--border)" }}>
+                          <tr
+                            key={record._id}
+                            className="transition-colors hover:opacity-90"
+                            style={{
+                              borderColor: "var(--border)",
+                              backgroundColor: record.isManualEntry ? "color-mix(in srgb, var(--accent) 4%, var(--surface))" : undefined
+                            }}
+                          >
                             <td className="py-3 px-4">
-                              <div className="flex flex-col">
-                                <strong className="font-semibold" style={{ color: "var(--text)" }}>{student.name || "Unknown Student"}</strong>
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <strong className="font-semibold" style={{ color: "var(--text)" }}>
+                                    {student.name || "Unknown Student"}
+                                  </strong>
+                                  {record.isManualEntry && (
+                                    <span className="px-1.5 py-0 rounded text-[9px] font-bold uppercase bg-amber-500/20 text-amber-700 dark:text-[#fca311] border border-amber-500/30">
+                                      Manual
+                                    </span>
+                                  )}
+                                </div>
                                 <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                                  {student.studentId ? `ID: ${student.studentId}` : student.email}
+                                  {student.studentId ? `ID: ${student.studentId}` : student.email || ""}
                                   {student.department ? ` · ${student.department}` : ""}
                                 </span>
                                 {student.phone && (
-                                  <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium flex items-center gap-1 mt-0.5">
+                                  <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium flex items-center gap-1">
                                     <PhoneIcon size={10} /> {student.phone}
+                                  </span>
+                                )}
+                                {record.adminComment && (
+                                  <span className="text-[10px] italic" style={{ color: "var(--text-dim)" }}>
+                                    {record.adminComment}
                                   </span>
                                 )}
                               </div>
@@ -460,14 +501,16 @@ function ComponentHistoryModal({ component: initialComponent, token, onClose, is
                             <td className="py-3 px-4 max-w-[160px] truncate" style={{ color: "var(--text-muted)" }} title={record.purpose}>{record.purpose || "—"}</td>
                             <td className="py-3 px-3">
                               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                                record.status === "issued" ? "bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30"
+                                record.status === "issued"   ? "bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30"
                                 : record.status === "returned" ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
-                                : record.status === "overdue" ? "bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30"
-                                : record.status === "broken" ? "bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30"
-                                : record.status === "lost" ? "bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/30"
+                                : record.status === "overdue"  ? "bg-rose-500/15 text-rose-700 dark:text-rose-400 border border-rose-500/30"
+                                : record.status === "broken"   ? "bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30"
+                                : record.status === "lost"     ? "bg-red-500/15 text-red-700 dark:text-red-400 border border-red-500/30"
                                 : "bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30"
                               }`}>
-                                {record.returnCondition && record.returnCondition !== "good" ? `${record.status} (${record.returnCondition})` : record.status}
+                                {record.returnCondition && record.returnCondition !== "good"
+                                  ? `${record.status} (${record.returnCondition})`
+                                  : record.status}
                               </span>
                             </td>
                             <td className="py-3 px-3" style={{ color: "var(--text-muted)" }}>
@@ -485,6 +528,31 @@ function ComponentHistoryModal({ component: initialComponent, token, onClose, is
                                 <span style={{ color: "var(--text-dim)" }}>—</span>
                               )}
                             </td>
+                            {isAdmin && (
+                              <td className="py-3 px-3 text-right">
+                                {record.isManualEntry ? (
+                                  <button
+                                    type="button"
+                                    className="p-1.5 rounded-lg transition-colors hover:bg-rose-500/15 text-rose-400 hover:text-rose-500"
+                                    title="Delete this manual record"
+                                    onClick={async () => {
+                                      if (!window.confirm("Delete this manual history record?")) return;
+                                      try {
+                                        await api.delete(`/requests/manual/${record._id}`, { headers });
+                                        setHistory(prev => prev.filter(r => r._id !== record._id));
+                                        setPagination(prev => ({ ...prev, totalItems: prev.totalItems - 1 }));
+                                      } catch (err) {
+                                        alert(err.response?.data?.message || "Failed to delete.");
+                                      }
+                                    }}
+                                  >
+                                    <TrashIcon size={13} />
+                                  </button>
+                                ) : (
+                                  <span className="text-[10px]" style={{ color: "var(--text-dim)" }}>—</span>
+                                )}
+                              </td>
+                            )}
                           </tr>
                         );
                       })}
@@ -620,7 +688,7 @@ function ComponentHistoryModal({ component: initialComponent, token, onClose, is
       </div>
     </div>
 
-    {/* Add Manual History Entry Modal */}
+    {/* Add Manual Lifecycle Entry Modal (Lifecycle tab) */}
     {showAddEntry && (
       <AddManualHistoryModal
         component={component}
@@ -628,6 +696,20 @@ function ComponentHistoryModal({ component: initialComponent, token, onClose, is
         onClose={() => setShowAddEntry(false)}
         onSuccess={(updatedHistory) => {
           setComponent((prev) => ({ ...prev, manualHistory: updatedHistory }));
+        }}
+      />
+    )}
+
+    {/* Add Manual Request History Modal (Request History tab) */}
+    {showAddRequestEntry && (
+      <AddRequestHistoryModal
+        component={component}
+        token={token}
+        onClose={() => setShowAddRequestEntry(false)}
+        onSuccess={(newEntry) => {
+          // Prepend the new entry to the top of the history list
+          setHistory(prev => [newEntry, ...prev]);
+          setPagination(prev => ({ ...prev, totalItems: prev.totalItems + 1 }));
         }}
       />
     )}
