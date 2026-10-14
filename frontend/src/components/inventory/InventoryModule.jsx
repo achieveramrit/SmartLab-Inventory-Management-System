@@ -8,6 +8,7 @@ import ComponentCardsGrid from "./ComponentCardsGrid";
 import AddComponentForm, { PRESET_CATEGORIES } from "./AddComponentForm";
 import ComponentModal from "./ComponentModal";
 import ComponentHistoryModal from "./ComponentHistoryModal";
+import EditComponentModal from "./EditComponentModal";
 import QuickIssueModal from "./QuickIssueModal";
 import MultiIssueModal from "./MultiIssueModal";
 import { SearchIcon, CloseIcon, FilterIcon, PlusIcon, ChipIcon } from "../ui/Icons";
@@ -40,12 +41,13 @@ function InventoryModule({ token, user, onNavigate, refreshRef, pageNavRef }) {
   const [activeCategory,    setActiveCategory]    = useState("All");
 
   // View state: Admin can toggle between Table and Cards; Students always get Cards
-  const [viewMode,          setViewMode]          = useState(isAdmin ? "table" : "cards");
+  const [viewMode,          setViewMode]          = useState("cards");
 
   // Modals state
   const [showAddModal,           setShowAddModal]           = useState(false);
   const [selectedComponent,      setSelectedComponent]      = useState(null);
   const [historyComponent,       setHistoryComponent]       = useState(null);
+  const [editComponent,          setEditComponent]          = useState(null);
   const [selectedIssueComponent, setSelectedIssueComponent] = useState(null);
 
   // Multi-issue cart (students only)
@@ -136,6 +138,17 @@ function InventoryModule({ token, user, onNavigate, refreshRef, pageNavRef }) {
       load(pagination.currentPage, searchTerm, activeCategory);
     } catch (err) {
       setMessage(err.response?.data?.message || "Delete failed.");
+    }
+  };
+
+  const handleEdit = async (id, data) => {
+    try {
+      await api.put(`/components/${id}`, data, { headers });
+      setMessage("Component updated successfully.");
+      load(pagination.currentPage, searchTerm, activeCategory);
+    } catch (err) {
+      setMessage(err.response?.data?.message || "Update failed.");
+      throw err; // re-throw so modal stays open on error
     }
   };
 
@@ -292,6 +305,7 @@ function InventoryModule({ token, user, onNavigate, refreshRef, pageNavRef }) {
                 onRequest={handleRequestClick}
                 onHistory={(comp) => setHistoryComponent(comp)}
                 onDelete={handleDelete}
+                onEdit={(comp) => setEditComponent(comp)}
               />
 
               <div className="pagination-row">
@@ -316,6 +330,7 @@ function InventoryModule({ token, user, onNavigate, refreshRef, pageNavRef }) {
                 onHistory={(comp) => setHistoryComponent(comp)}
                 onDelete={handleDelete}
                 onRequest={handleRequestClick}
+                onEdit={(comp) => setEditComponent(comp)}
               />
 
               <div className="pagination-row">
@@ -351,6 +366,15 @@ function InventoryModule({ token, user, onNavigate, refreshRef, pageNavRef }) {
           isAdmin={isAdmin}
           onHistory={(comp) => setHistoryComponent(comp)}
           onClose={() => setSelectedComponent(null)}
+        />
+      )}
+
+      {/* Edit Component Modal (Admin Only) */}
+      {editComponent && (
+        <EditComponentModal
+          component={editComponent}
+          onSave={handleEdit}
+          onClose={() => setEditComponent(null)}
         />
       )}
 

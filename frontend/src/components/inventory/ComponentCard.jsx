@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChipIcon, EyeIcon, HistoryIcon, TrashIcon, BoltIcon } from "../ui/Icons";
+import { ChipIcon, EyeIcon, HistoryIcon, TrashIcon, BoltIcon, EditIcon } from "../ui/Icons";
 
 /**
  * ComponentCard
@@ -20,6 +20,7 @@ function ComponentCard({
   onRequest,
   onHistory,
   onDelete,
+  onEdit,
 }) {
   const [imgError, setImgError] = useState(false);
 
@@ -106,6 +107,16 @@ function ComponentCard({
 
         {isAdmin ? (
           <div className="card-admin-btns">
+            {onEdit && (
+              <button
+                type="button"
+                className="ghost small-btn"
+                onClick={() => onEdit(c)}
+                title="Edit component details"
+              >
+                <EditIcon size={13} /> Edit
+              </button>
+            )}
             {onHistory && (
               <button
                 type="button"

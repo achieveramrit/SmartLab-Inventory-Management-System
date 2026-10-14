@@ -43,8 +43,19 @@ function Sidebar({
 
       {/* Brand Header */}
       <div className="flex items-center gap-3 pb-4 mb-2 border-b border-white/10">
-        <div className="w-9 h-9 rounded-xl bg-[#fca311] text-black font-black flex items-center justify-center text-sm shadow-gold flex-shrink-0 tracking-wider">
-          SL
+        <div className="w-9 h-9 rounded-xl bg-[#fca311] text-black flex items-center justify-center shadow-gold flex-shrink-0" style={{ boxShadow: "0 0 14px rgba(252,163,17,0.4)" }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2" />
+            <rect x="9" y="9" width="6" height="6" />
+            <line x1="9" y1="1" x2="9" y2="4" />
+            <line x1="15" y1="1" x2="15" y2="4" />
+            <line x1="9" y1="20" x2="9" y2="23" />
+            <line x1="15" y1="20" x2="15" y2="23" />
+            <line x1="20" y1="9" x2="23" y2="9" />
+            <line x1="20" y1="14" x2="23" y2="14" />
+            <line x1="1" y1="9" x2="4" y2="9" />
+            <line x1="1" y1="14" x2="4" y2="14" />
+          </svg>
         </div>
         <div className="min-w-0">
           <strong className="block text-sm font-extrabold tracking-tight text-white leading-tight">
@@ -124,8 +135,25 @@ function Sidebar({
           onKeyDown={(e) => e.key === "Enter" && onOpenProfile?.()}
         >
           {/* Avatar */}
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#fca311] to-amber-300 text-black font-extrabold flex items-center justify-center text-sm shadow-md group-hover:scale-105 transition-transform flex-shrink-0">
-            {user.name?.charAt(0)?.toUpperCase() || "U"}
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-extrabold flex-shrink-0 group-hover:scale-105 transition-transform"
+            style={{
+              background: isAdmin
+                ? "linear-gradient(135deg, #fca311, #f59e0b)"
+                : "linear-gradient(135deg, #3b82f6, #6366f1)",
+              color: isAdmin ? "#000" : "#fff",
+              boxShadow: isAdmin
+                ? "0 0 0 2px rgba(252,163,17,0.3), 0 2px 8px rgba(252,163,17,0.3)"
+                : "0 0 0 2px rgba(99,102,241,0.3), 0 2px 8px rgba(99,102,241,0.3)",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {user.name
+              ? user.name.trim().split(/\s+/).length > 1
+                ? (user.name.trim().split(/\s+/)[0][0] + user.name.trim().split(/\s+/).slice(-1)[0][0]).toUpperCase()
+                : user.name.charAt(0).toUpperCase()
+              : isAdmin ? "LA" : "U"
+            }
           </div>
 
           {/* User Details */}

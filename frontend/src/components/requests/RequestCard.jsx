@@ -7,7 +7,8 @@ import {
   CheckIcon,
   AlertTriangleIcon,
   XCircleIcon,
-  BoltIcon
+  BoltIcon,
+  ReturnIcon
 } from "../ui/Icons";
 
 /**
@@ -210,17 +211,33 @@ function RequestCard({ request: r, isAdmin, onAction, onReturnPrompt, onExtendPr
                 <>
                   <button
                     type="button"
-                    className="primary small-btn"
                     onClick={() => onAction(r._id, "approve")}
+                    title="Approve this request"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: "5px",
+                      padding: "6px 13px", borderRadius: "9px", fontSize: "12px", fontWeight: 700,
+                      cursor: "pointer", border: "none", transition: "all 0.15s",
+                      background: "linear-gradient(135deg, #10b981, #059669)",
+                      color: "#fff", boxShadow: "0 2px 8px rgba(16,185,129,0.35)",
+                    }}
                   >
-                    Approve
+                    <CheckIcon size={12} />
+                    <span>Approve</span>
                   </button>
                   <button
                     type="button"
-                    className="danger small-btn"
                     onClick={() => onAction(r._id, "reject", { rejectionReason: "Rejected by lab admin" })}
+                    title="Reject this request"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: "5px",
+                      padding: "6px 13px", borderRadius: "9px", fontSize: "12px", fontWeight: 700,
+                      cursor: "pointer", border: "none", transition: "all 0.15s",
+                      background: "linear-gradient(135deg, #f43f5e, #e11d48)",
+                      color: "#fff", boxShadow: "0 2px 8px rgba(244,63,94,0.35)",
+                    }}
                   >
-                    Reject
+                    <XCircleIcon size={12} />
+                    <span>Reject</span>
                   </button>
                 </>
               )}
@@ -228,19 +245,26 @@ function RequestCard({ request: r, isAdmin, onAction, onReturnPrompt, onExtendPr
               {r.status === "approved" && (
                 <button
                   type="button"
-                  className="primary small-btn"
                   onClick={() => onAction(r._id, "issue", {
                     expectedReturnDate: new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10),
                   })}
+                  title="Issue component to student"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "5px",
+                    padding: "6px 14px", borderRadius: "9px", fontSize: "12px", fontWeight: 700,
+                    cursor: "pointer", border: "none", transition: "all 0.15s",
+                    background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+                    color: "#fff", boxShadow: "0 2px 8px rgba(59,130,246,0.35)",
+                  }}
                 >
-                  Issue to Student
+                  <BoltIcon size={12} />
+                  <span>Issue to Student</span>
                 </button>
               )}
 
               {(isIssued || isOverdue) && (
                 <button
                   type="button"
-                  className="primary small-btn"
                   onClick={() => {
                     if (onReturnPrompt) {
                       onReturnPrompt(r);
@@ -248,9 +272,22 @@ function RequestCard({ request: r, isAdmin, onAction, onReturnPrompt, onExtendPr
                       onAction(r._id, "return");
                     }
                   }}
-                  title="Mark returned and verify physical condition"
+                  title="Mark as returned and verify physical condition"
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "5px",
+                    padding: "6px 14px", borderRadius: "9px", fontSize: "12px", fontWeight: 700,
+                    cursor: "pointer", border: "none", transition: "all 0.15s",
+                    background: isOverdue
+                      ? "linear-gradient(135deg, #f59e0b, #d97706)"
+                      : "linear-gradient(135deg, #fca311, #f59e0b)",
+                    color: "#000",
+                    boxShadow: isOverdue
+                      ? "0 2px 8px rgba(245,158,11,0.4)"
+                      : "0 2px 8px rgba(252,163,17,0.35)",
+                  }}
                 >
-                  Mark Return
+                  <ReturnIcon size={12} />
+                  <span>Mark Return</span>
                 </button>
               )}
             </>
@@ -260,12 +297,19 @@ function RequestCard({ request: r, isAdmin, onAction, onReturnPrompt, onExtendPr
           {!isAdmin && (isIssued || isOverdue) && (
             <button
               type="button"
-              className="ghost small-btn"
               onClick={() => onExtendPrompt?.(r)}
               title="Request an extension on the return date"
-              style={{ border: "1px solid var(--accent)", color: "var(--accent)" }}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: "5px",
+                padding: "6px 13px", borderRadius: "9px", fontSize: "12px", fontWeight: 700,
+                cursor: "pointer", transition: "all 0.15s",
+                background: "transparent",
+                color: "var(--accent)",
+                border: "1.5px solid var(--accent)",
+              }}
             >
-              Extend Return
+              <CalendarIcon size={12} />
+              <span>Extend Return</span>
             </button>
           )}
         </div>

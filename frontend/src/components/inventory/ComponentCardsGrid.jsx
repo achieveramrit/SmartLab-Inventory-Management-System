@@ -19,6 +19,7 @@ function ComponentCardsGrid({
   onRequest,
   onHistory,
   onDelete,
+  onEdit,
 }) {
   if (!components || components.length === 0) {
     return (
@@ -43,6 +44,7 @@ function ComponentCardsGrid({
           onRequest={onRequest}
           onHistory={onHistory}
           onDelete={onDelete}
+          onEdit={onEdit}
         />
       ))}
     </div>

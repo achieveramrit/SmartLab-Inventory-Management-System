@@ -1,4 +1,4 @@
-import { ChipIcon, EyeIcon, HistoryIcon, TrashIcon, BoltIcon } from "../ui/Icons";
+import { ChipIcon, EyeIcon, HistoryIcon, TrashIcon, BoltIcon, EditIcon } from "../ui/Icons";
 
 /**
  * ComponentTable
@@ -11,7 +11,7 @@ import { ChipIcon, EyeIcon, HistoryIcon, TrashIcon, BoltIcon } from "../ui/Icons
  *   onHistory  {(component: object) => void}  — opens component history modal
  *   onDelete   {(id: string) => void}
  */
-function ComponentTable({ components, isAdmin, onSelect, onHistory, onDelete, onRequest }) {
+function ComponentTable({ components, isAdmin, onSelect, onHistory, onDelete, onRequest, onEdit }) {
   return (
     <div className="table-wrap">
       <table>
@@ -118,6 +118,17 @@ function ComponentTable({ components, isAdmin, onSelect, onHistory, onDelete, on
 
                   {isAdmin && (
                     <>
+                      <button
+                        type="button"
+                        className="icon-action-btn edit-action"
+                        onClick={() => onEdit?.(c)}
+                        title="Edit component details"
+                        aria-label={`Edit ${c.name}`}
+                      >
+                        <EditIcon size={13} />
+                        <span className="action-btn-text">Edit</span>
+                      </button>
+
                       <button
                         type="button"
                         className="icon-action-btn history-action"
