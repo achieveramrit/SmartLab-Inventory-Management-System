@@ -18,6 +18,7 @@ import { UserIcon } from "../ui/Icons";
 const NAV_ITEMS = [
   { key: "inventory", label: "Inventory",        num: "01" },
   { key: "requests",  label: "Requests & Issue", num: "02" },
+  { key: "projects",  label: "IoT Projects",     num: "03" },
 ];
 
 function Sidebar({

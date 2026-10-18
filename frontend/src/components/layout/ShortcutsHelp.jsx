@@ -31,6 +31,7 @@ function ShortcutsHelp({ onClose }) {
             <h4>Navigation</h4>
             <div className="shortcut-row"><kbd>1</kbd><span>Inventory catalog</span></div>
             <div className="shortcut-row"><kbd>2</kbd><span>Requests &amp; Issue module</span></div>
+            <div className="shortcut-row"><kbd>3</kbd><span>IoT Projects recommendation hub</span></div>
             <div className="shortcut-row"><kbd>P</kbd><span>My Profile &amp; Security</span></div>
             <div className="shortcut-row"><kbd>?</kbd><span>Toggle this help dialog</span></div>
             <div className="shortcut-row"><kbd>Esc</kbd><span>Close dialogs / drawer</span></div>

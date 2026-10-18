@@ -25,12 +25,17 @@ console.log("componentRoutes:", typeof componentRoutes);
 const requestRoutes = require("./routes/requestRoutes");
 console.log("requestRoutes:", typeof requestRoutes);
 
+const projectRoutes = require("./routes/projectRoutes");
+console.log("projectRoutes:", typeof projectRoutes);
+
 
 app.use("/api/auth", authRoutes);
 
 app.use("/api/components", componentRoutes);
 
 app.use("/api/requests", requestRoutes);
+
+app.use("/api/projects", projectRoutes);
 
 
 app.get("/", (req, res) => {
